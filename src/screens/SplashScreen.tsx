@@ -1,5 +1,14 @@
-import React from 'react';
-import { View, Text, StyleSheet, StatusBar, Dimensions } from 'react-native';
+// src/screens/SplashScreen.tsx
+import React, { useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  StatusBar,
+  Dimensions,
+  Animated,
+  Easing,
+} from 'react-native';
 
 let LinearGradient: any = null;
 try {
@@ -9,13 +18,32 @@ try {
 }
 
 const { width } = Dimensions.get('window');
+const PILL_WIDTH = Math.min(300, width * 0.6);
 
 export default function SplashScreen() {
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Trigger one full rotation (0 → 360)
+    Animated.timing(rotateAnim, {
+      toValue: 1,
+      duration: 1500, // 1.5 seconds
+      easing: Easing.inOut(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+  }, [rotateAnim]);
+
+  // Interpolate the value into degrees
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={styles.container.backgroundColor as string} />
 
-      <View style={styles.buttonWrap}>
+      <Animated.View style={[styles.buttonWrap, { transform: [{ rotate: spin }] }]}>
         <View style={styles.leftPill}>
           <Text style={styles.leftText}>Logo</Text>
         </View>
@@ -34,17 +62,15 @@ export default function SplashScreen() {
             <Text style={styles.rightText}>Ipsum</Text>
           </View>
         )}
-      </View>
+      </Animated.View>
     </View>
   );
 }
 
-const PILL_WIDTH = Math.min(300, width * 0.6);
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#dfe5ee', // exact match with image background
+    backgroundColor: '#dfe5ee',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -54,7 +80,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 6,
     borderWidth: 3,
-    borderColor: '#1b2452', // same as left pill
+    borderColor: '#1b2452',
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -64,7 +90,7 @@ const styles = StyleSheet.create({
   },
   leftPill: {
     flex: 1,
-    backgroundColor: '#1b2452', // deep navy from image
+    backgroundColor: '#1b2452',
     alignItems: 'center',
     justifyContent: 'center',
   },
